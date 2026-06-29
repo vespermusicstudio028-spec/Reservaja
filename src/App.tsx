@@ -16,7 +16,7 @@ import { supabase } from "./lib/supabase";
 
 function TrialBanner({ createdAt, email }: { createdAt: string | null, email: string | null }) {
   if (!createdAt) return null;
-  if (email === "veraspatrick@gmail.com") return null;
+  if (email === "veraspatrick@gmail.com" || email === "atendimento@reservaja.com.br") return null;
   
   const created = new Date(createdAt);
   const now = new Date();
