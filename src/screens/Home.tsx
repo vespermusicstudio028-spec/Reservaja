@@ -7,6 +7,7 @@ import { Button, Input } from "../components/ui";
 import { motion } from "motion/react";
 import { Modal } from "../components/Modal";
 import confetti from "canvas-confetti";
+import logoImg from "../assets/images/reserva_ja_logo_1782703217853.jpg";
 
 interface HomeProps {
   goals: Goal[];
@@ -439,7 +440,7 @@ export function Home({
         <h1 className="flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-white">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl shadow-sm overflow-hidden bg-white">
             <img
-              src="/src/assets/images/reserva_ja_logo_1782703217853.jpg"
+              src={logoImg}
               alt="Logo"
               className="h-full w-full object-cover"
             />

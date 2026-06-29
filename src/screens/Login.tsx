@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Eye, EyeOff, Target, ArrowRight, UserPlus } from "lucide-react";
 import { Button, Input } from "../components/ui";
+import logoImg from "../assets/images/reserva_ja_logo_1782703217853.jpg";
 
 interface LoginProps {
   onLogin: () => void;
@@ -92,7 +93,7 @@ export function Login({ onLogin }: LoginProps) {
             className="mx-auto flex h-32 w-32 items-center justify-center rounded-2xl shadow-lg overflow-hidden"
           >
             <img
-              src="/src/assets/images/reserva_ja_logo_1782703217853.jpg"
+              src={logoImg}
               alt="Reserva Já Logo"
               className="h-full w-full object-cover"
             />

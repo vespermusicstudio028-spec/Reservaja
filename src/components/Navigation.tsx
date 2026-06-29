@@ -6,6 +6,7 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react";
 import { cn } from "../utils";
+import logoImg from "../assets/images/reserva_ja_logo_1782703217853.jpg";
 
 interface NavProps {
   currentTab: string;
@@ -60,7 +61,7 @@ export function SideNav({ currentTab, onTabChange }: NavProps) {
       <div className="mb-10 flex items-center gap-3 px-2">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl shadow-sm overflow-hidden bg-white">
           <img
-            src="/src/assets/images/reserva_ja_logo_1782703217853.jpg"
+            src={logoImg}
             alt="Logo"
             className="h-full w-full object-cover"
           />
