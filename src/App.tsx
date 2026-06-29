@@ -12,6 +12,7 @@ import { SettingsScreen } from "./screens/Settings";
 import { Login } from "./screens/Login";
 import { BottomNav, SideNav } from "./components/Navigation";
 import { motion, AnimatePresence } from "motion/react";
+import { supabase } from "./lib/supabase";
 
 function TrialBanner({ createdAt, email }: { createdAt: string | null, email: string | null }) {
   if (!createdAt) return null;
@@ -93,9 +94,8 @@ export default function App() {
           <ProfileScreen
             profile={profile}
             onUpdateProfile={setProfile}
-            onLogout={() => {
-              localStorage.removeItem('reservaja_token');
-              setIsAuthenticated(false);
+            onLogout={async () => {
+              await supabase.auth.signOut();
             }}
           />
         );

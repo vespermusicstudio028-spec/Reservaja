@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Goal, Profile, Settings } from './types';
 import { v4 as uuidv4 } from 'uuid';
+import { supabase } from './lib/supabase';
 
 const defaultProfile: Profile = {
   name: 'Usuário',
@@ -20,80 +21,72 @@ export function useStore() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userCreatedAt, setUserCreatedAt] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Sync with backend
+  // Listen to Supabase auth state
   useEffect(() => {
-    const token = localStorage.getItem('reservaja_token');
-    if (!token) {
-      setIsLoaded(true);
-      setIsAuthenticated(false);
-      return;
-    }
-    
-    setIsAuthenticated(true);
-    
-    fetch('/api/sync', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    .then(res => {
-      if (!res.ok) throw new Error('Auth failed');
-      return res.json();
-    })
-    .then(data => {
-      if (data.goals) setGoals(data.goals);
-      if (data.profile) setProfile({ ...defaultProfile, ...data.profile });
-      if (data.settings) setSettings({ ...defaultSettings, ...data.settings });
-      if (data.createdAt) setUserCreatedAt(data.createdAt);
-      if (data.email) setUserEmail(data.email);
-    })
-    .catch(e => {
-      console.error('Failed to load from backend', e);
-      // Fallback or handle auth error
-      if (e.message === 'Auth failed') {
-        localStorage.removeItem('reservaja_token');
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        setIsAuthenticated(true);
+        setUserEmail(session.user.email ?? null);
+        setUserId(session.user.id);
+        await loadUserData(session.user.id);
+      } else {
         setIsAuthenticated(false);
+        setUserEmail(null);
+        setUserId(null);
+        setGoals([]);
+        setProfile(defaultProfile);
+        setSettings(defaultSettings);
+        setIsLoaded(true);
       }
-    })
-    .finally(() => {
-      setIsLoaded(true);
     });
-  }, [isAuthenticated]);
 
-  // Save changes to backend
-  const saveToBackend = useCallback(async (endpoint: string, data: any) => {
-    const token = localStorage.getItem('reservaja_token');
-    if (!token) return;
-    try {
-      await fetch(`/api/${endpoint}`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify(data)
-      });
-    } catch (e) {
-      console.error(`Failed to save ${endpoint}`, e);
-    }
+    // Check current session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        setIsLoaded(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Update profile
-  const handleSetProfile = useCallback((newProfile: Profile) => {
-    setProfile(newProfile);
-    saveToBackend('profile', { profile: newProfile });
-  }, [saveToBackend]);
+  const loadUserData = async (uid: string) => {
+    try {
+      // Load profile/settings
+      const { data: userData } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', uid)
+        .single();
 
-  // Update settings
-  const handleSetSettings = useCallback((newSettings: Settings) => {
-    setSettings(newSettings);
-    saveToBackend('settings', { settings: newSettings });
-  }, [saveToBackend]);
+      if (userData) {
+        if (userData.profile) setProfile({ ...defaultProfile, ...userData.profile });
+        if (userData.settings) setSettings({ ...defaultSettings, ...userData.settings });
+        if (userData.created_at) setUserCreatedAt(userData.created_at);
+      }
+
+      // Load goals
+      const { data: goalsData } = await supabase
+        .from('goals')
+        .select('data')
+        .eq('user_id', uid);
+
+      if (goalsData) {
+        setGoals(goalsData.map((g: any) => g.data as Goal));
+      }
+    } catch (e) {
+      console.error('Failed to load user data', e);
+    } finally {
+      setIsLoaded(true);
+    }
+  };
 
   // Apply theme
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
-
     if (settings.theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       root.classList.add(systemTheme);
@@ -102,10 +95,36 @@ export function useStore() {
     }
   }, [settings.theme]);
 
-  const saveGoals = useCallback((newGoals: Goal[]) => {
+  // Update profile
+  const handleSetProfile = useCallback(async (newProfile: Profile) => {
+    setProfile(newProfile);
+    if (!userId) return;
+    await supabase.from('users').update({ profile: newProfile }).eq('id', userId);
+  }, [userId]);
+
+  // Update settings
+  const handleSetSettings = useCallback(async (newSettings: Settings) => {
+    setSettings(newSettings);
+    if (!userId) return;
+    await supabase.from('users').update({ settings: newSettings }).eq('id', userId);
+  }, [userId]);
+
+  // Sync goals to Supabase
+  const saveGoals = useCallback(async (newGoals: Goal[]) => {
     setGoals(newGoals);
-    saveToBackend('goals/sync', { goals: newGoals });
-  }, [saveToBackend]);
+    if (!userId) return;
+    try {
+      // Delete all and re-insert (simple sync strategy)
+      await supabase.from('goals').delete().eq('user_id', userId);
+      if (newGoals.length > 0) {
+        await supabase.from('goals').insert(
+          newGoals.map(g => ({ user_id: userId, goal_id: g.id, data: g }))
+        );
+      }
+    } catch (e) {
+      console.error('Failed to save goals', e);
+    }
+  }, [userId]);
 
   const addGoal = useCallback((goal: Omit<Goal, 'id' | 'createdAt' | 'savedAmount' | 'history'>) => {
     const newGoal: Goal = {
@@ -131,15 +150,11 @@ export function useStore() {
       if (goal.id === goalId) {
         const newSavedAmount = Math.min(goal.savedAmount + amount, goal.targetAmount);
         const actualAdded = newSavedAmount - goal.savedAmount;
-
         if (actualAdded > 0) {
           return {
             ...goal,
             savedAmount: newSavedAmount,
-            history: [
-              ...goal.history,
-              { id: uuidv4(), date: new Date().toISOString(), amount: actualAdded },
-            ],
+            history: [...goal.history, { id: uuidv4(), date: new Date().toISOString(), amount: actualAdded }],
           };
         }
       }
@@ -152,15 +167,11 @@ export function useStore() {
       if (goal.id === goalId) {
         const newSavedAmount = Math.max(goal.savedAmount - amount, 0);
         const actualRemoved = goal.savedAmount - newSavedAmount;
-
         if (actualRemoved > 0) {
           return {
             ...goal,
             savedAmount: newSavedAmount,
-            history: [
-              ...goal.history,
-              { id: uuidv4(), date: new Date().toISOString(), amount: -actualRemoved },
-            ],
+            history: [...goal.history, { id: uuidv4(), date: new Date().toISOString(), amount: -actualRemoved }],
           };
         }
       }
