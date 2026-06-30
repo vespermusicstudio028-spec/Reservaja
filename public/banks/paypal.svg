@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="32" fill="white"/>
+  <!-- PayPal double P icon -->
+  <text x="50%" y="42%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="68" fill="#009CDE">P</text>
+  <text x="52%" y="42%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="68" fill="#003087">P</text>
+  <text x="50%" y="76%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#003087" letter-spacing="1">PayPal</text>
+</svg>

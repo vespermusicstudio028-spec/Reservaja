@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="32" fill="#00C566"/>
+  <text x="50%" y="38%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="60" fill="white">∞</text>
+  <text x="50%" y="72%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="26" fill="white" letter-spacing="1">InfinitePay</text>
+</svg>

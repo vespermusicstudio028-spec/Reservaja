@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="32" fill="#005CA9"/>
+  <!-- Caixa logo style - orange stripe on left -->
+  <rect x="0" y="0" width="56" height="200" rx="32" fill="#F7941D"/>
+  <rect x="32" y="0" width="24" height="200" fill="#F7941D"/>
+  <text x="55%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="38" fill="white" letter-spacing="1">CAIXA</text>
+</svg>
