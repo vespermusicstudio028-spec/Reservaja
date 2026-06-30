@@ -671,31 +671,56 @@ export function Home({
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Banco para Reserva (opcional)
             </label>
-            <div className="relative">
-              <select
-                className="block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white appearance-none pl-10"
-                value={goalForm.bank}
-                onChange={(e) => setGoalForm(prev => ({ ...prev, bank: e.target.value }))}
+            <div className="grid grid-cols-4 gap-2">
+              <button
+                type="button"
+                onClick={() => setGoalForm(prev => ({ ...prev, bank: "" }))}
+                className={`flex flex-col items-center gap-1 rounded-xl p-2 border-2 transition-all text-xs font-medium ${
+                  !goalForm.bank
+                    ? "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400"
+                    : "border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 hover:border-gray-300"
+                }`}
               >
-                <option value="">Nenhum / Selecionar...</option>
-                {BANKS.map(bank => (
-                  <option key={bank.id} value={bank.id}>{bank.name}</option>
-                ))}
-              </select>
-              {goalForm.bank ? (
-                <img 
-                  src={BANKS.find(b => b.id === goalForm.bank)?.logoUrl} 
-                  alt="Bank Logo" 
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 object-contain"
-                />
-              ) : (
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-gray-100 flex items-center justify-center">
-                  <Wallet className="h-3 w-3 text-gray-400" />
+                <div className="h-8 w-8 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                  <Wallet className="h-4 w-4 text-gray-400" />
                 </div>
-              )}
+                <span className="leading-tight text-center">Nenhum</span>
+              </button>
+              {BANKS.map(bank => (
+                <button
+                  key={bank.id}
+                  type="button"
+                  onClick={() => setGoalForm(prev => ({ ...prev, bank: bank.id }))}
+                  className={`flex flex-col items-center gap-1 rounded-xl p-2 border-2 transition-all text-xs font-medium ${
+                    goalForm.bank === bank.id
+                      ? "border-[2px] bg-opacity-10"
+                      : "border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 hover:border-gray-300"
+                  }`}
+                  style={goalForm.bank === bank.id ? {
+                    borderColor: bank.color,
+                    backgroundColor: bank.color + "18",
+                    color: bank.color,
+                  } : {}}
+                >
+                  <div className="h-8 w-8 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm overflow-hidden p-0.5">
+                    <img
+                      src={bank.logoUrl}
+                      alt={bank.name}
+                      className="h-full w-full object-contain"
+                      onError={(e) => {
+                        const el = e.target as HTMLImageElement;
+                        el.style.display = 'none';
+                        el.parentElement!.innerHTML = bank.name.charAt(0);
+                        el.parentElement!.className += ' text-xs font-bold text-gray-600';
+                      }}
+                    />
+                  </div>
+                  <span className="leading-tight text-center line-clamp-1">{bank.name}</span>
+                </button>
+              ))}
             </div>
           </div>
           <div className="relative">

@@ -135,16 +135,24 @@ export function GoalCard({
               ) : null}
             </p>
             <div className="flex flex-wrap items-center gap-2">
-              {goal.bank && BANKS.find((b) => b.id === goal.bank) && (
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700">
-                  <img
-                    src={BANKS.find((b) => b.id === goal.bank)?.logoUrl}
-                    alt={BANKS.find((b) => b.id === goal.bank)?.name}
-                    className="h-3 w-3 object-contain"
-                  />
-                  {BANKS.find((b) => b.id === goal.bank)?.name}
-                </div>
-              )}
+              {goal.bank && (() => {
+                const bank = BANKS.find((b) => b.id === goal.bank);
+                if (!bank) return null;
+                return (
+                  <div
+                    className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold"
+                    style={{ backgroundColor: bank.color + "22", color: bank.color, border: `1px solid ${bank.color}44` }}
+                  >
+                    <img
+                      src={bank.logoUrl}
+                      alt={bank.name}
+                      className="h-4 w-4 object-contain rounded-sm"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                    {bank.name}
+                  </div>
+                );
+              })()}
               {goal.productUrl && (
                 <a
                   href={goal.productUrl}
