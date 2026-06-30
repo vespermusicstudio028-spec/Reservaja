@@ -11,6 +11,7 @@ import {
 import { Button } from "./ui";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../utils";
+import { BANKS } from "../utils/banks";
 
 interface GoalCardProps {
   key?: React.Key;
@@ -121,7 +122,7 @@ export function GoalCard({
             )}
           </div>
           </div>
-          <div className="mt-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Total:{" "}
               <span className="font-medium text-gray-900 dark:text-gray-200">
@@ -133,18 +134,30 @@ export function GoalCard({
                 </span>
               ) : null}
             </p>
-            {goal.productUrl && (
-              <a
-                href={goal.productUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1 w-max rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
-              >
-                {getStoreName(goal.productUrl)}
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              {goal.bank && BANKS.find((b) => b.id === goal.bank) && (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700">
+                  <img
+                    src={BANKS.find((b) => b.id === goal.bank)?.logoUrl}
+                    alt={BANKS.find((b) => b.id === goal.bank)?.name}
+                    className="h-3 w-3 object-contain"
+                  />
+                  {BANKS.find((b) => b.id === goal.bank)?.name}
+                </div>
+              )}
+              {goal.productUrl && (
+                <a
+                  href={goal.productUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-1 w-max rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                >
+                  {getStoreName(goal.productUrl)}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>

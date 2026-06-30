@@ -13,6 +13,7 @@ export interface Goal {
   savedAmount: number;
   installments?: number;
   installmentValue?: number;
+  bank?: string;
   createdAt: string; // ISO string
   history: GoalHistory[];
 }

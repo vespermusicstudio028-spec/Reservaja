@@ -8,6 +8,7 @@ import { motion } from "motion/react";
 import { Modal } from "../components/Modal";
 import confetti from "canvas-confetti";
 import logoImg from "../assets/images/reserva_ja_logo_1782703217853.jpg";
+import { BANKS } from "../utils/banks";
 
 interface HomeProps {
   goals: Goal[];
@@ -47,6 +48,7 @@ export function Home({
     installmentValue: "",
     imageUrl: "",
     productUrl: "",
+    bank: "",
   });
 
   const [isMoneyModalOpen, setIsMoneyModalOpen] = useState(false);
@@ -216,6 +218,7 @@ export function Home({
         installmentValue,
         imageUrl: goalForm.imageUrl,
         productUrl: goalForm.productUrl,
+        bank: goalForm.bank,
       });
     } else {
       onAddGoal({
@@ -225,6 +228,7 @@ export function Home({
         installmentValue,
         imageUrl: goalForm.imageUrl,
         productUrl: goalForm.productUrl,
+        bank: goalForm.bank,
       });
     }
 
@@ -234,7 +238,7 @@ export function Home({
   const closeGoalModal = () => {
     setIsGoalModalOpen(false);
     setEditingGoal(null);
-    setGoalForm({ name: "", targetAmount: "", installments: "1", installmentValue: "", imageUrl: "", productUrl: "" });
+    setGoalForm({ name: "", targetAmount: "", installments: "1", installmentValue: "", imageUrl: "", productUrl: "", bank: "" });
   };
 
   const handleAddMoney = (e: React.FormEvent) => {
@@ -543,6 +547,7 @@ export function Home({
                   installmentValue: g.installmentValue ? g.installmentValue.toString() : "",
                   imageUrl: g.imageUrl,
                   productUrl: g.productUrl || "",
+                  bank: g.bank || "",
                 });
                 setIsGoalModalOpen(true);
               }}
@@ -664,6 +669,34 @@ export function Home({
                 }}
               />
             )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Banco para Reserva (opcional)
+            </label>
+            <div className="relative">
+              <select
+                className="block w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white appearance-none pl-10"
+                value={goalForm.bank}
+                onChange={(e) => setGoalForm(prev => ({ ...prev, bank: e.target.value }))}
+              >
+                <option value="">Nenhum / Selecionar...</option>
+                {BANKS.map(bank => (
+                  <option key={bank.id} value={bank.id}>{bank.name}</option>
+                ))}
+              </select>
+              {goalForm.bank ? (
+                <img 
+                  src={BANKS.find(b => b.id === goalForm.bank)?.logoUrl} 
+                  alt="Bank Logo" 
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 object-contain"
+                />
+              ) : (
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-gray-100 flex items-center justify-center">
+                  <Wallet className="h-3 w-3 text-gray-400" />
+                </div>
+              )}
+            </div>
           </div>
           <div className="relative">
             <Input
