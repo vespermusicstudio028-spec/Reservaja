@@ -1,5 +1,3 @@
-import { useStore } from '../store';
-
 export const BANKS_BASE = [
   {
     id: "mercadopago",
@@ -75,11 +73,12 @@ export const BANKS_BASE = [
   },
 ];
 
-export function useBanks() {
-  const { profile } = useStore();
-  
-  return BANKS_BASE.map(bank => ({
-    ...bank,
-    logoUrl: profile?.customBanks?.[bank.id] || bank.logoUrl
-  }));
+// Alias para compatibilidade
+export const BANKS = BANKS_BASE;
+
+export function getBankLogoUrl(bankId: string, customBanks?: Record<string, string>): string {
+  const bank = BANKS_BASE.find(b => b.id === bankId);
+  if (!bank) return '';
+  return customBanks?.[bankId] || bank.logoUrl;
 }
+

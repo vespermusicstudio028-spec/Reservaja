@@ -8,7 +8,7 @@ import { motion } from "motion/react";
 import { Modal } from "../components/Modal";
 import confetti from "canvas-confetti";
 import logoImg from "../assets/images/reserva_ja_logo_1782703217853.jpg";
-import { BANKS_BASE, useBanks } from "../utils/banks";
+import { BANKS } from "../utils/banks";
 
 interface HomeProps {
   goals: Goal[];
@@ -38,7 +38,6 @@ export function Home({
 }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<string>("newest");
-  const BANKS = useBanks();
 
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);

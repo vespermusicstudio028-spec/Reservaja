@@ -11,7 +11,7 @@ import {
 import { Button } from "./ui";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../utils";
-import { useBanks } from "../utils/banks";
+import { BANKS } from "../utils/banks";
 
 interface GoalCardProps {
   key?: React.Key;
@@ -48,7 +48,6 @@ export function GoalCard({
   currency,
 }: GoalCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const BANKS = useBanks();
   const percentage =
     Math.min(100, Math.round((goal.savedAmount / goal.targetAmount) * 100)) ||
     0;
