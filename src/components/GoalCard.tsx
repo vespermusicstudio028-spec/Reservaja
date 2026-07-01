@@ -11,7 +11,7 @@ import {
 import { Button } from "./ui";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../utils";
-import { BANKS } from "../utils/banks";
+import { BANKS, getBankLogoUrl } from "../utils/banks";
 
 interface GoalCardProps {
   key?: React.Key;
@@ -21,6 +21,7 @@ interface GoalCardProps {
   onAddMoney: (id: string) => void;
   onRemoveMoney: (id: string) => void;
   currency: string;
+  customBanks?: Record<string, string>;
 }
 
 function getStoreName(url: string): string {
@@ -46,6 +47,7 @@ export function GoalCard({
   onAddMoney,
   onRemoveMoney,
   currency,
+  customBanks,
 }: GoalCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const percentage =
@@ -144,7 +146,7 @@ export function GoalCard({
                     style={{ backgroundColor: bank.color + "22", color: bank.color, border: `1px solid ${bank.color}44` }}
                   >
                     <img
-                      src={bank.logoUrl}
+                      src={getBankLogoUrl(bank.id, customBanks)}
                       alt={bank.name}
                       className="h-4 w-4 object-contain rounded-sm"
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

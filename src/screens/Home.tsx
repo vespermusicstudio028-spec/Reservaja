@@ -8,7 +8,7 @@ import { motion } from "motion/react";
 import { Modal } from "../components/Modal";
 import confetti from "canvas-confetti";
 import logoImg from "../assets/images/reserva_ja_logo_1782703217853.jpg";
-import { BANKS } from "../utils/banks";
+import { BANKS, getBankLogoUrl } from "../utils/banks";
 
 interface HomeProps {
   goals: Goal[];
@@ -538,6 +538,7 @@ export function Home({
               key={goal.id}
               goal={goal}
               currency={profile.currency}
+              customBanks={profile.customBanks}
               onEdit={(g) => {
                 setEditingGoal(g);
                 setGoalForm({
@@ -707,7 +708,7 @@ export function Home({
                 >
                   <div className="h-8 w-8 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center shadow-sm overflow-hidden p-0.5">
                     <img
-                      src={bank.logoUrl}
+                      src={getBankLogoUrl(bank.id, profile.customBanks)}
                       alt={bank.name}
                       className="h-full w-full object-contain"
                       onError={(e) => {
