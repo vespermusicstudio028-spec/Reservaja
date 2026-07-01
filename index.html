@@ -10,7 +10,7 @@
     <title>Reserva Já</title>
     <script>
       // Force cache clear and SW unregister on first load of this new version
-      if (!localStorage.getItem('cache_cleared_v4')) {
+      if (!localStorage.getItem('cache_cleared_v5')) {
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations().then(function(registrations) {
             for(let registration of registrations) {
@@ -18,7 +18,10 @@
             }
           });
         }
-        localStorage.setItem('cache_cleared_v4', 'true');
+        caches.keys().then(function(names) {
+          for (let name of names) caches.delete(name);
+        });
+        localStorage.setItem('cache_cleared_v5', 'true');
         window.location.reload(true);
       }
     </script>

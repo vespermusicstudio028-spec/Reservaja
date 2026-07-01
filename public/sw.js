@@ -1,4 +1,4 @@
-const CACHE_NAME = 'reservaja-v3';
+const CACHE_NAME = 'reservaja-v4';
 const urlsToCache = [
   '/',
   '/index.html',
