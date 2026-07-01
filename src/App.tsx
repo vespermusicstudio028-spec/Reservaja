@@ -106,6 +106,9 @@ export default function App() {
             onUpdateSettings={setSettings}
             fullData={{ goals, profile, settings }}
             onImportData={importData}
+            profile={profile}
+            onUpdateProfile={setProfile}
+            isAdmin={userEmail === "veraspatrick@gmail.com" || userEmail === "atendimento@reservaja.com.br"}
           />
         );
       default:
