@@ -1,4 +1,6 @@
-export const BANKS = [
+import { useStore } from '../store';
+
+export const BANKS_BASE = [
   {
     id: "mercadopago",
     name: "Mercado Pago",
@@ -72,3 +74,12 @@ export const BANKS = [
     color: "#003087",
   },
 ];
+
+export function useBanks() {
+  const { profile } = useStore();
+  
+  return BANKS_BASE.map(bank => ({
+    ...bank,
+    logoUrl: profile?.customBanks?.[bank.id] || bank.logoUrl
+  }));
+}

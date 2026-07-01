@@ -22,6 +22,7 @@ export interface Profile {
   name: string;
   photoUrl: string;
   currency: string;
+  customBanks?: Record<string, string>;
 }
 
 export interface Settings {
