@@ -29,7 +29,7 @@ git commit -m "%msg%"
 
 echo.
 echo 4. Enviando alteracoes para o GitHub (Git Push)...
-git push origin master
+git push origin master:main -f
 if %errorlevel% neq 0 (
     echo.
     echo [ERRO] Falha ao enviar para o GitHub. Verifique suas credenciais.
