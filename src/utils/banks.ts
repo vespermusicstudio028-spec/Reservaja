@@ -76,7 +76,14 @@ export const BANKS_BASE = [
 // Alias para compatibilidade
 export const BANKS = BANKS_BASE;
 
-export function getBankLogoUrl(bankId: string, customBanks?: Record<string, string>): string {
+export function getBankLogoUrl(
+  bankId: string,
+  customBanks?: Record<string, string>,
+  extraBanks?: { id: string; logoUrl: string }[]
+): string {
+  const extraBank = extraBanks?.find(b => b.id === bankId);
+  if (extraBank) return extraBank.logoUrl;
+
   const bank = BANKS_BASE.find(b => b.id === bankId);
   if (!bank) return '';
   return customBanks?.[bankId] || bank.logoUrl;
