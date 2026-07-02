@@ -11,7 +11,8 @@ import {
 import { Button } from "./ui";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../utils";
-import { BANKS, getBankLogoUrl } from "../utils/banks";
+import { BANKS_BASE, getBankLogoUrl } from "../utils/banks";
+import { CustomBankEntry } from "../types";
 
 interface GoalCardProps {
   key?: React.Key;
@@ -22,6 +23,7 @@ interface GoalCardProps {
   onRemoveMoney: (id: string) => void;
   currency: string;
   customBanks?: Record<string, string>;
+  extraBanks?: CustomBankEntry[];
 }
 
 function getStoreName(url: string): string {
@@ -48,7 +50,9 @@ export function GoalCard({
   onRemoveMoney,
   currency,
   customBanks,
+  extraBanks,
 }: GoalCardProps) {
+  const allBanks = [...BANKS_BASE, ...(extraBanks || [])];
   const [isExpanded, setIsExpanded] = useState(false);
   const percentage =
     Math.min(100, Math.round((goal.savedAmount / goal.targetAmount) * 100)) ||
@@ -138,7 +142,7 @@ export function GoalCard({
             </p>
             <div className="flex flex-wrap items-center gap-2">
               {goal.bank && (() => {
-                const bank = BANKS.find((b) => b.id === goal.bank);
+                const bank = allBanks.find((b) => b.id === goal.bank);
                 if (!bank) return null;
                 return (
                   <div

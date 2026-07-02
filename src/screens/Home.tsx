@@ -8,7 +8,7 @@ import { motion } from "motion/react";
 import { Modal } from "../components/Modal";
 import confetti from "canvas-confetti";
 import logoImg from "../assets/images/reserva_ja_logo_1782703217853.jpg";
-import { BANKS, getBankLogoUrl } from "../utils/banks";
+import { BANKS_BASE, getBankLogoUrl } from "../utils/banks";
 
 interface HomeProps {
   goals: Goal[];
@@ -41,6 +41,13 @@ export function Home({
 
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+
+  // Merge default banks with admin-added custom banks
+  const allBanks = useMemo(() => [
+    ...BANKS_BASE,
+    ...(profile.extraBanks || []),
+  ], [profile.extraBanks]);
+
   const [goalForm, setGoalForm] = useState({
     name: "",
     targetAmount: "",
@@ -539,6 +546,7 @@ export function Home({
               goal={goal}
               currency={profile.currency}
               customBanks={profile.customBanks}
+              extraBanks={profile.extraBanks}
               onEdit={(g) => {
                 setEditingGoal(g);
                 setGoalForm({
@@ -690,7 +698,7 @@ export function Home({
                 </div>
                 <span className="leading-tight text-center">Nenhum</span>
               </button>
-              {BANKS.map(bank => (
+              {allBanks.map(bank => (
                 <button
                   key={bank.id}
                   type="button"

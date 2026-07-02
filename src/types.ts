@@ -18,11 +18,19 @@ export interface Goal {
   history: GoalHistory[];
 }
 
+export interface CustomBankEntry {
+  id: string;
+  name: string;
+  logoUrl: string;
+  color: string;
+}
+
 export interface Profile {
   name: string;
   photoUrl: string;
   currency: string;
   customBanks?: Record<string, string>;
+  extraBanks?: CustomBankEntry[];
 }
 
 export interface Settings {

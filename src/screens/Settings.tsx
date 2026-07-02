@@ -1,14 +1,15 @@
 import React, { useRef, useState } from 'react';
-import { Settings as SettingsType, Profile } from '../types';
+import { Settings as SettingsType, Profile, CustomBankEntry } from '../types';
 import { exportData } from '../utils';
-import { Moon, Sun, Monitor, Download, Upload, Info } from 'lucide-react';
+import { Moon, Sun, Monitor, Download, Upload, Info, Plus, Trash2 } from 'lucide-react';
 import { Button, Input } from '../components/ui';
 import { BANKS_BASE } from '../utils/banks';
+import { v4 as uuidv4 } from 'uuid';
 
 interface SettingsScreenProps {
   settings: SettingsType;
   onUpdateSettings: (settings: SettingsType) => void;
-  fullData: any; // Used for export
+  fullData: any;
   onImportData: (data: string) => boolean;
   profile?: Profile;
   onUpdateProfile?: (profile: Profile) => void;
@@ -27,7 +28,13 @@ export function SettingsScreen({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState<'geral' | 'bancos'>('geral');
   const [customBanks, setCustomBanks] = useState<Record<string, string>>(profile?.customBanks || {});
+  const [extraBanks, setExtraBanks] = useState<CustomBankEntry[]>(profile?.extraBanks || []);
   const [saved, setSaved] = useState(false);
+
+  // New bank form state
+  const [newBankName, setNewBankName] = useState('');
+  const [newBankLogo, setNewBankLogo] = useState('');
+  const [newBankColor, setNewBankColor] = useState('#6366f1');
 
   const handleImportClick = () => {
     fileInputRef.current?.click();
@@ -50,7 +57,6 @@ export function SettingsScreen({
     };
     reader.readAsText(file);
     
-    // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -61,11 +67,33 @@ export function SettingsScreen({
     if (profile && onUpdateProfile) {
       onUpdateProfile({
         ...profile,
-        customBanks
+        customBanks,
+        extraBanks,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     }
+  };
+
+  const handleAddExtraBank = () => {
+    if (!newBankName.trim() || !newBankLogo.trim()) {
+      alert('Preencha o nome e a URL da logo do banco.');
+      return;
+    }
+    const id = `custom_${uuidv4().slice(0, 8)}`;
+    setExtraBanks(prev => [...prev, {
+      id,
+      name: newBankName.trim(),
+      logoUrl: newBankLogo.trim(),
+      color: newBankColor,
+    }]);
+    setNewBankName('');
+    setNewBankLogo('');
+    setNewBankColor('#6366f1');
+  };
+
+  const handleRemoveExtraBank = (id: string) => {
+    setExtraBanks(prev => prev.filter(b => b.id !== id));
   };
 
   return (
@@ -79,7 +107,6 @@ export function SettingsScreen({
         </p>
       </header>
 
-      {/* Só exibe as abas se for Administrador */}
       {isAdmin && (
         <div className="mb-6 flex gap-4 border-b border-gray-200 dark:border-gray-700">
           <button
@@ -197,9 +224,12 @@ export function SettingsScreen({
           </section>
         </div>
       ) : (
-        <form onSubmit={handleSaveBanks} className="space-y-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800">
-          <div className="space-y-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <form onSubmit={handleSaveBanks} className="space-y-6">
+
+          {/* ── Bancos padrão ── */}
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800 space-y-4">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Logos dos bancos padrão</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Personalize as URLs das imagens de cada banco. Deixe em branco para usar a imagem padrão.
             </p>
             {BANKS_BASE.map(bank => (
@@ -231,9 +261,106 @@ export function SettingsScreen({
             ))}
           </div>
 
-          <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
+          {/* ── Bancos extras ── */}
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800 space-y-4">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Bancos extras (personalizados)</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Adicione bancos que não constam na lista padrão. Eles aparecerão na seleção ao criar ou editar uma meta.
+            </p>
+
+            {/* List of extra banks */}
+            {extraBanks.length > 0 && (
+              <div className="space-y-2">
+                {extraBanks.map(bank => (
+                  <div key={bank.id} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+                    <div
+                      className="h-10 w-10 shrink-0 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center p-1 shadow-sm overflow-hidden"
+                      style={{ border: `1px solid ${bank.color}44` }}
+                    >
+                      <img
+                        src={bank.logoUrl}
+                        alt={bank.name}
+                        className="max-h-full max-w-full object-contain"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{bank.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{bank.logoUrl}</p>
+                    </div>
+                    <div className="w-5 h-5 rounded-full shrink-0" style={{ backgroundColor: bank.color }} title={bank.color} />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveExtraBank(bank.id)}
+                      className="shrink-0 rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors"
+                      title="Remover banco"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add new bank form */}
+            <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 p-4 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Adicionar novo banco</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Input
+                  label="Nome do banco"
+                  placeholder="Ex: Banco XYZ"
+                  value={newBankName}
+                  onChange={e => setNewBankName(e.target.value)}
+                />
+                <Input
+                  label="URL da logo"
+                  placeholder="https://..."
+                  value={newBankLogo}
+                  onChange={e => setNewBankLogo(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cor do banco</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={newBankColor}
+                      onChange={e => setNewBankColor(e.target.value)}
+                      className="h-10 w-16 cursor-pointer rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1"
+                    />
+                    <span className="text-sm text-gray-500 dark:text-gray-400 font-mono">{newBankColor}</span>
+                  </div>
+                </div>
+                {/* Preview */}
+                {newBankLogo && (
+                  <div className="flex flex-col items-center gap-1">
+                    <p className="text-xs text-gray-400">Preview</p>
+                    <div
+                      className="h-10 w-10 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center p-1 shadow-sm overflow-hidden"
+                      style={{ border: `2px solid ${newBankColor}` }}
+                    >
+                      <img src={newBankLogo} alt="preview" className="max-h-full max-w-full object-contain"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleAddExtraBank}
+                className="flex items-center gap-2 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 px-4 py-2 text-sm font-medium text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                Adicionar banco
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-2">
             <Button type="submit" fullWidth>
-              {saved ? "Salvo com sucesso!" : "Salvar Alterações"}
+              {saved ? '✅ Salvo com sucesso!' : 'Salvar Alterações'}
             </Button>
           </div>
         </form>
