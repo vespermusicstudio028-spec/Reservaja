@@ -7,13 +7,7 @@ echo      ATUALIZADOR DE REPOSITORIO - RESERVA JA
 echo ===================================================
 echo.
 
-echo 1. Buscando atualizacoes no GitHub (Git Pull)...
-git pull --rebase
-if %errorlevel% neq 0 (
-    echo.
-    echo [ERRO] Falha ao sincronizar com o GitHub. Verifique sua conexao ou credenciais.
-    goto fim
-)
+:: Pull removido para evitar erros de conflito com o remoto
 
 echo.
 echo 2. Preparando arquivos para envio (Git Add)...
