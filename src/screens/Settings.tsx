@@ -81,19 +81,40 @@ export function SettingsScreen({
       return;
     }
     const id = `custom_${uuidv4().slice(0, 8)}`;
-    setExtraBanks(prev => [...prev, {
+    const newBank = {
       id,
       name: newBankName.trim(),
       logoUrl: newBankLogo.trim(),
       color: newBankColor,
-    }]);
+    };
+    
+    const newExtraBanks = [...extraBanks, newBank];
+    setExtraBanks(newExtraBanks);
+    
+    if (profile && onUpdateProfile) {
+      onUpdateProfile({
+        ...profile,
+        customBanks,
+        extraBanks: newExtraBanks,
+      });
+    }
+
     setNewBankName('');
     setNewBankLogo('');
     setNewBankColor('#6366f1');
   };
 
   const handleRemoveExtraBank = (id: string) => {
-    setExtraBanks(prev => prev.filter(b => b.id !== id));
+    const newExtraBanks = extraBanks.filter(b => b.id !== id);
+    setExtraBanks(newExtraBanks);
+    
+    if (profile && onUpdateProfile) {
+      onUpdateProfile({
+        ...profile,
+        customBanks,
+        extraBanks: newExtraBanks,
+      });
+    }
   };
 
   return (
