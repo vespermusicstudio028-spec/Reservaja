@@ -62,6 +62,7 @@ export function useStore() {
         .single();
 
       if (userData) {
+        console.log("Loaded userData from Supabase:", userData);
         if (userData.profile) setProfile({ ...defaultProfile, ...userData.profile });
         if (userData.settings) setSettings({ ...defaultSettings, ...userData.settings });
         if (userData.created_at) setUserCreatedAt(userData.created_at);
@@ -95,11 +96,18 @@ export function useStore() {
     }
   }, [settings.theme]);
 
-  // Update profile
   const handleSetProfile = useCallback(async (newProfile: Profile) => {
     setProfile(newProfile);
     if (!userId) return;
-    await supabase.from('users').update({ profile: newProfile }).eq('id', userId);
+    const { data, error, status } = await supabase.from('users').update({ profile: newProfile }).eq('id', userId).select();
+    console.log("Supabase profile update response:", { data, error, status });
+    if (error) {
+      console.error('Failed to save profile:', error);
+      alert('Erro ao salvar no banco de dados: ' + error.message);
+    } else if (!data || data.length === 0) {
+      console.warn('Profile update succeeded but no rows were updated (possible RLS issue).');
+      alert('Aviso: As alterações parecem não ter sido salvas no banco de dados (erro de permissão/RLS).');
+    }
   }, [userId]);
 
   // Update settings
