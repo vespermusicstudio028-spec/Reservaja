@@ -25,13 +25,39 @@ export function useStore() {
 
   // Listen to Supabase auth state
   useEffect(() => {
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+        
+        if (error || !session) {
+          setIsLoaded(true);
+        } else if (session?.user) {
+          setIsAuthenticated(true);
+          setUserEmail(session.user.email ?? null);
+          setUserId(session.user.id);
+          await loadUserData(session.user.id);
+        }
+      } catch (err) {
+        console.error("Error fetching initial session:", err);
+        if (mounted) setIsLoaded(true);
+      }
+    };
+
+    initializeAuth();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'INITIAL_SESSION') return; // Handled by initializeAuth
+      
       if (session?.user) {
         setIsAuthenticated(true);
         setUserEmail(session.user.email ?? null);
         setUserId(session.user.id);
         await loadUserData(session.user.id);
-      } else {
+      } else if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
         setUserEmail(null);
         setUserId(null);
@@ -42,14 +68,10 @@ export function useStore() {
       }
     });
 
-    // Check current session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        setIsLoaded(true);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const loadUserData = async (uid: string) => {
